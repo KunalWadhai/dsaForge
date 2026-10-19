@@ -177,15 +177,12 @@ export default function ChatApp() {
   }
 
   async function handleLogout() {
-    try {
-      setProfileDropdownOpen(false);
-      await authApi.logout();
-      notify("Logged out successfully");
-      setTimeout(() => router.push("/login"), 500);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      notify("Logout failed");
-    }
+    setProfileDropdownOpen(false);
+    // Redirect immediately — authApi.logout clears the token synchronously
+    // before the server call, so navigation is instant and safe.
+    router.push("/login");
+    // Fire server-side session invalidation in the background.
+    authApi.logout().catch((err) => console.warn("Logout server call failed (ignored):", err));
   }
 
   // Close dropdowns when clicking outside

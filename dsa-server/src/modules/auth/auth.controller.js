@@ -45,7 +45,7 @@ export const refresh = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   await authService.logout(req.cookies[REFRESH_COOKIE]);
   res.clearCookie(REFRESH_COOKIE, cookieOptions());
-  res.status(204).end();
+  res.status(200).json({ success: true, message: "Logged out" });
 });
 
 export const me = asyncHandler(async (req, res) => {
