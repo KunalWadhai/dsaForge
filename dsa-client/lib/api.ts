@@ -140,11 +140,21 @@ export const authApi = {
   },
   
   logout: async () => {
+    // Always clear the in-memory token first so no further authenticated
+    // requests can be made, regardless of whether the server call succeeds.
+    clearAccessToken();
     try {
-      await apiRequest<void>("/auth/logout", { method: "POST" }, { retryOnUnauthorized: false });
-    } finally {
-      // Always clear access token on logout
-      clearAccessToken();
+      // Fire-and-forget the server-side session invalidation.
+      // We skip auth (token already cleared) and never retry on 401.
+      // The server returns 204 No Content on success; errors are swallowed
+      // intentionally — the user is logged out client-side either way.
+      await apiRequest<void>(
+        "/auth/logout",
+        { method: "POST" },
+        { retryOnUnauthorized: false, skipAuth: true },
+      );
+    } catch {
+      // Silently ignore — client is already logged out.
     }
   },
   
