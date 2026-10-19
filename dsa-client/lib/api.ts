@@ -16,21 +16,51 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api/v1";
 
 export type ApiError = { message: string; status?: number };
+export type AuthUser = { id: string; name: string; email: string };
 
-// Store access token in memory (cleared on page refresh - that's intentional)
+// ── in-memory token ────────────────────────────────────────────────────────
+// Cleared on page refresh intentionally — short-lived access tokens should not
+// be persisted to storage.
 let accessToken: string | null = null;
 
-export function setAccessToken(token: string | null) {
-  accessToken = token;
+export function setAccessToken(token: string | null) { accessToken = token; }
+export function getAccessToken(): string | null { return accessToken; }
+export function clearAccessToken() { accessToken = null; }
+
+// ── bootstrap (runs once per page load) ───────────────────────────────────
+// Shared singleton promise so that multiple callers (useAuthGate, ChatApp)
+// never fire more than one /auth/refresh on startup.
+let _bootstrapPromise: Promise<AuthUser | null> | null = null;
+
+export function bootstrapAuth(): Promise<AuthUser | null> {
+  if (_bootstrapPromise) return _bootstrapPromise;
+
+  _bootstrapPromise = (async () => {
+    // Already have a token in memory (same-tab login before this ran).
+    if (accessToken) return null; // caller must fetch /me separately if they need the user
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const token: string | undefined = data?.data?.accessToken;
+      const user: AuthUser | undefined = data?.data?.user;
+      if (token) setAccessToken(token);
+      return user ?? null;
+    } catch {
+      return null;
+    }
+  })();
+
+  return _bootstrapPromise;
 }
 
-export function getAccessToken(): string | null {
-  return accessToken;
-}
-
-export function clearAccessToken() {
-  accessToken = null;
-}
+/** Reset bootstrap so the next call re-runs (call after logout). */
+export function resetBootstrap() { _bootstrapPromise = null; }
 
 export async function apiRequest<T>(
   path: string,
@@ -140,15 +170,11 @@ export const authApi = {
   },
   
   logout: async () => {
-    // Always clear the in-memory token first so no further authenticated
-    // requests can be made, regardless of whether the server call succeeds.
+    // Clear client state immediately — user is logged out regardless of network.
     clearAccessToken();
+    resetBootstrap(); // allow next page load to re-run bootstrap
     try {
-      // Fire-and-forget the server-side session invalidation.
-      // We skip auth (token already cleared) and never retry on 401.
-      // The server returns 204 No Content on success; errors are swallowed
-      // intentionally — the user is logged out client-side either way.
-      await apiRequest<void>(
+      await apiRequest<{ success: true; message: string }>(
         "/auth/logout",
         { method: "POST" },
         { retryOnUnauthorized: false, skipAuth: true },
