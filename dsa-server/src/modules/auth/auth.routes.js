@@ -8,10 +8,32 @@ import { loginSchema, registerSchema } from "./auth.validation.js";
 const router = Router();
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, standardHeaders: "draft-7", legacyHeaders: false, message: { success: false, message: "Too many authentication attempts. Try again later." } });
 
-router.post("/register", authLimiter, validateBody(registerSchema), controller.register);
-router.post("/login", authLimiter, validateBody(loginSchema), controller.login);
-router.post("/refresh", authLimiter, controller.refresh);
-router.post("/logout", controller.logout);
-router.get("/me", requireAuth, controller.me);
+router
+.post(
+    "/register", 
+    authLimiter, 
+    validateBody(registerSchema), 
+    controller.register
+)
+.post(
+    "/login", 
+    authLimiter, 
+    validateBody(loginSchema), 
+    controller.login
+)
+.post(
+    "/refresh", 
+    authLimiter, 
+    controller.refresh
+)
+.post(
+    "/logout", 
+    controller.logout
+)
+.get(
+    "/me", 
+    requireAuth, 
+    controller.me
+);
 
 export default router;

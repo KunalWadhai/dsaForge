@@ -38,13 +38,13 @@ This project uses comprehensive documentation for **agentic coding** - enabling 
 
 | Document | Purpose | Read When |
 |----------|---------|-----------|
-| **[PRD.md](./PRD.md)** | Product Requirements | Understanding what to build |
-| **[DESIGN.md](./DESIGN.md)** | UI/UX Design System | Designing or modifying UI |
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | System Architecture | Understanding how system works |
-| **[DATABASE.md](./DATABASE.md)** | Database Schemas & Queries | Working with data models |
-| **[API.md](./API.md)** | API Endpoints & Auth | Building/consuming APIs |
-| **[AGENTS.md](./AGENTS.md)** | AI Agent Coding Guidelines | **START HERE** for AI agents |
-| **[IMPLEMENTATION.md](./IMPLEMENTATION.md)** | Setup, Testing, Deployment | Setting up or deploying |
+| **[PRD.md](./docs/PRD.md)** | Product Requirements | Understanding what to build |
+| **[DESIGN.md](./docs/DESIGN.md)** | UI/UX Design System | Designing or modifying UI |
+| **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** | System Architecture | Understanding how system works |
+| **[DATABASE.md](./docs/DATABASE.md)** | Database Schemas & Queries | Working with data models |
+| **[API.md](./docs/API.md)** | API Endpoints & Auth | Building/consuming APIs |
+| **[AGENTS.md](./docs/AGENTS.md)** | AI Agent Coding Guidelines | **START HERE** for AI agents |
+| **[IMPLEMENTATION.md](./docs/IMPLEMENTATION.md)** | Setup, Testing, Deployment | Setting up or deploying |
 
 ### Documentation Reading Order
 
@@ -284,7 +284,7 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 - `PATCH /api/v1/conversations/:id` - Update conversation
 - `DELETE /api/v1/conversations/:id` - Delete conversation
 
-**Full API docs**: [API.md](./API.md)
+**Full API docs**: [API.md](./docs/API.md)
 
 ---
 
@@ -320,7 +320,7 @@ cd dsa-client
 vercel --prod
 ```
 
-**Deployment guide**: [IMPLEMENTATION.md](./IMPLEMENTATION.md#5-production-deployment)
+**Deployment guide**: [IMPLEMENTATION.md](./docs/IMPLEMENTATION.md#5-production-deployment)
 
 ---
 
@@ -341,7 +341,7 @@ vercel --prod
 ### Issue: Refresh token loop
 **Solution**: Already fixed - check `_retry` flag in API interceptor
 
-**Full troubleshooting**: [IMPLEMENTATION.md](./IMPLEMENTATION.md#4-common-issues--fixes)
+**Full troubleshooting**: [IMPLEMENTATION.md](./docs/IMPLEMENTATION.md#4-common-issues--fixes)
 
 ---
 
@@ -373,7 +373,7 @@ vercel --prod
 
 ### For Human Developers
 
-1. Read [AGENTS.md](./AGENTS.md) for coding standards
+1. Read [AGENTS.md](./docs/AGENTS.md) for coding standards
 2. Create feature branch: `git checkout -b feature/your-feature`
 3. Make changes following style guide
 4. Write tests (maintain >80% coverage)
@@ -383,7 +383,7 @@ vercel --prod
 
 ### For AI Coding Agents
 
-**Start Here**: [AGENTS.md](./AGENTS.md)
+**Start Here**: [AGENTS.md](./docs/AGENTS.md)
 
 This file contains:
 - Project context and structure
@@ -413,16 +413,16 @@ This file contains:
 5. Track your progress in profile
 
 ### For Developers Learning RAG
-1. Read [ARCHITECTURE.md](./ARCHITECTURE.md) - RAG pipeline section
+1. Read [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - RAG pipeline section
 2. Examine `src/modules/chat/rag.service.js`
 3. Test with `scripts/test-nvidia-integration.js`
 4. Modify prompt engineering in RAG service
 5. Experiment with retrieval parameters
 
 ### For System Architects
-1. Review [ARCHITECTURE.md](./ARCHITECTURE.md) - Full system design
-2. Examine [DATABASE.md](./DATABASE.md) - Data modeling decisions
-3. Review [API.md](./API.md) - API design patterns
+1. Review [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Full system design
+2. Examine [DATABASE.md](./docs/DATABASE.md) - Data modeling decisions
+3. Review [API.md](./docs/API.md) - API design patterns
 4. Consider scaling strategies in IMPLEMENTATION.md
 
 ---
@@ -430,10 +430,10 @@ This file contains:
 ## 📞 Support
 
 ### Documentation
-- Technical issues: See [IMPLEMENTATION.md](./IMPLEMENTATION.md#12-troubleshooting-production-issues)
-- API questions: See [API.md](./API.md)
-- Architecture questions: See [ARCHITECTURE.md](./ARCHITECTURE.md)
-- Database questions: See [DATABASE.md](./DATABASE.md)
+- Technical issues: See [IMPLEMENTATION.md](./docs/IMPLEMENTATION.md#12-troubleshooting-production-issues)
+- API questions: See [API.md](./docs/API.md)
+- Architecture questions: See [ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- Database questions: See [DATABASE.md](./docs/DATABASE.md)
 
 ### External Resources
 - [Express.js Docs](https://expressjs.com/)
@@ -507,12 +507,12 @@ This file contains:
 
 ## Quick Links
 
-- [Product Requirements (PRD)](./PRD.md)
-- [Design System](./DESIGN.md)
-- [System Architecture](./ARCHITECTURE.md)
-- [Database Documentation](./DATABASE.md)
-- [API Documentation](./API.md)
-- [Agent Guidelines](./AGENTS.md)
-- [Implementation Guide](./IMPLEMENTATION.md)
+- [Product Requirements (PRD)](./docs/PRD.md)
+- [Design System](./docs/DESIGN.md)
+- [System Architecture](./docs/ARCHITECTURE.md)
+- [Database Documentation](./docs/DATABASE.md)
+- [API Documentation](./docs/API.md)
+- [Agent Guidelines](./docs/AGENTS.md)
+- [Implementation Guide](./docs/IMPLEMENTATION.md)
 
-**For AI Agents**: Start with [AGENTS.md](./AGENTS.md) 🤖
+**For AI Agents**: Start with [AGENTS.md](./docs/AGENTS.md) 🤖
