@@ -2,80 +2,75 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ComponentProps } from "react";
 
-type MarkdownMessageProps = {
-  content: string;
-};
+type Props = { content: string };
 
-export default function MarkdownMessage({ content }: MarkdownMessageProps) {
+export default function MarkdownMessage({ content }: Props) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        // Headings
-        h1: ({ node, ...props }) => <h1 className="md-h1" {...props} />,
-        h2: ({ node, ...props }) => <h2 className="md-h2" {...props} />,
-        h3: ({ node, ...props }) => <h3 className="md-h3" {...props} />,
-        h4: ({ node, ...props }) => <h4 className="md-h4" {...props} />,
-        
-        // Paragraphs
-        p: ({ node, ...props }) => <p className="md-p" {...props} />,
-        
-        // Lists
-        ul: ({ node, ...props }) => <ul className="md-ul" {...props} />,
-        ol: ({ node, ...props }) => <ol className="md-ol" {...props} />,
-        li: ({ node, ...props }) => <li className="md-li" {...props} />,
-        
-        // Code
-        code: ({ node, inline, className, children, ...props }) => {
+        h1: (p) => <h1 className="md-h1" {...p} />,
+        h2: (p) => <h2 className="md-h2" {...p} />,
+        h3: (p) => <h3 className="md-h3" {...p} />,
+        h4: (p) => <h4 className="md-h4" {...p} />,
+
+        p: (p) => <p className="md-p" {...p} />,
+
+        ul: (p) => <ul className="md-ul" {...p} />,
+        ol: (p) => <ol className="md-ol" {...p} />,
+        li: (p) => <li className="md-li" {...p} />,
+
+        // react-markdown v8+ removed the `inline` prop.
+        // Detect inline code: no language class + no newline in content.
+        code: ({ className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || "");
-          return inline ? (
-            <code className="md-code-inline" {...props}>
-              {children}
-            </code>
-          ) : (
+          const isBlock = Boolean(match) || String(children).includes("\n");
+
+          return isBlock ? (
             <div className="md-code-block-wrapper">
               {match && <div className="md-code-lang">{match[1]}</div>}
               <pre className="md-pre">
-                <code className={`md-code ${className || ""}`} {...props}>
+                <code className={`md-code ${className ?? ""}`} {...props}>
                   {children}
                 </code>
               </pre>
             </div>
+          ) : (
+            <code className="md-code-inline" {...props}>
+              {children}
+            </code>
           );
         },
-        
-        // Blockquote
-        blockquote: ({ node, ...props }) => (
-          <blockquote className="md-blockquote" {...props} />
+
+        blockquote: (p) => <blockquote className="md-blockquote" {...p} />,
+
+        a: ({ href, children, ...p }) => (
+          <a
+            className="md-link"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            {...p}
+          >
+            {children}
+          </a>
         ),
-        
-        // Links
-        a: ({ node, ...props }) => (
-          <a className="md-link" target="_blank" rel="noopener noreferrer" {...props} />
-        ),
-        
-        // Tables
-        table: ({ node, ...props }) => (
+
+        table: (p) => (
           <div className="md-table-wrapper">
-            <table className="md-table" {...props} />
+            <table className="md-table" {...p} />
           </div>
         ),
-        thead: ({ node, ...props }) => <thead className="md-thead" {...props} />,
-        tbody: ({ node, ...props }) => <tbody className="md-tbody" {...props} />,
-        tr: ({ node, ...props }) => <tr className="md-tr" {...props} />,
-        th: ({ node, ...props }) => <th className="md-th" {...props} />,
-        td: ({ node, ...props}) => <td className="md-td" {...props} />,
-        
-        // Horizontal rule
-        hr: ({ node, ...props }) => <hr className="md-hr" {...props} />,
-        
-        // Strong/Bold
-        strong: ({ node, ...props }) => <strong className="md-strong" {...props} />,
-        
-        // Emphasis/Italic
-        em: ({ node, ...props }) => <em className="md-em" {...props} />,
+        thead: (p) => <thead className="md-thead" {...p} />,
+        tbody: (p) => <tbody className="md-tbody" {...p} />,
+        tr:    (p) => <tr    className="md-tr"    {...p} />,
+        th:    (p) => <th    className="md-th"    {...p} />,
+        td:    (p) => <td    className="md-td"    {...p} />,
+
+        hr:     (p) => <hr     className="md-hr"     {...p} />,
+        strong: (p) => <strong className="md-strong" {...p} />,
+        em:     (p) => <em     className="md-em"     {...p} />,
       }}
     >
       {content}

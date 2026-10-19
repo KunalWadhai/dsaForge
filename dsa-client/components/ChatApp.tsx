@@ -8,7 +8,7 @@ import {
   Sparkles, ThumbsDown, ThumbsUp, X, Zap, Trash2, Moon, Sun, User, AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { chatApi, authApi, setAccessToken } from "@/lib/api";
+import { chatApi, authApi } from "@/lib/api";
 import { useAuthGate } from "@/lib/useAuthGate";
 import MarkdownMessage from "./MarkdownMessage";
 import AuthPromptModal from "./AuthPromptModal";
@@ -55,11 +55,9 @@ export default function ChatApp() {
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const { showGate, dismiss: dismissGate, markAuthenticated } = useAuthGate({ delayMs: 2 * 60 * 1000 });
+  const { showGate, dismiss: dismissGate } = useAuthGate({ delayMs: 2 * 60 * 1000 });
 
   const activeTitle = useMemo(() => threads.find(t => t.id === activeThread)?.title || "New conversation", [threads, activeThread]);
-
-  const { showGate, dismiss: dismissGate } = useAuthGate({ delayMs: 2 * 60 * 1000 });
 
   function notify(message: string) {
     setToast(message);
