@@ -7,7 +7,15 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
   API_PREFIX: z.string().default("/api/v1"),
-  FRONTEND_ORIGIN: z.string().url().default("http://localhost:3000"),
+  FRONTEND_ORIGIN: z
+    .string()
+    .default("http://localhost:3000")
+    .transform((val) => {
+      // Support a comma-separated list of origins, e.g.:
+      //   FRONTEND_ORIGIN=http://localhost:3000,https://dsaforge.com
+      const origins = val.split(",").map((s) => s.trim()).filter(Boolean);
+      return origins.length === 1 ? origins[0] : origins;
+    }),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
   JWT_ACCESS_SECRET: z.string().min(24, "JWT_ACCESS_SECRET must be at least 24 characters"),
   JWT_REFRESH_SECRET: z.string().min(24, "JWT_REFRESH_SECRET must be at least 24 characters"),
