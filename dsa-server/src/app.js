@@ -9,12 +9,46 @@ import chatRoutes from "./modules/chat/chat.routes.js";
 import ingestionRoutes from "./modules/ingestion/ingestion.routes.js";
 import { HttpError } from "./utils/httpError.js";
 
+/**
+ * Build the CORS origin resolver.
+ *
+ * - In development: any localhost / 127.0.0.1 origin is allowed
+ *   automatically so you never need to update the env var just to change
+ *   the Next.js port.
+ * - In all envs: origins listed in FRONTEND_ORIGIN (comma-separated) are
+ *   allowed.
+ * - Any other origin is rejected with a CORS error.
+ */
+function buildCorsOrigin() {
+  const allowed = Array.isArray(env.FRONTEND_ORIGIN)
+    ? env.FRONTEND_ORIGIN
+    : [env.FRONTEND_ORIGIN];
+
+  const localhostRe = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+  return function corsOriginFn(origin, callback) {
+    // Non-browser requests (curl, Postman, server-to-server) have no Origin.
+    if (!origin) return callback(null, true);
+
+    // Always allow localhost in dev — avoids env-var friction during local work.
+    if (!isProduction && localhostRe.test(origin)) {
+      return callback(null, true);
+    }
+
+    if (allowed.includes(origin)) {
+      return callback(null, true);
+    }
+
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  };
+}
+
 export const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", isProduction ? 1 : false);
 app.use(helmet());
 app.use(cors({
-  origin: env.FRONTEND_ORIGIN,
+  origin: buildCorsOrigin(),
   credentials: true,
   methods: ["GET", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
