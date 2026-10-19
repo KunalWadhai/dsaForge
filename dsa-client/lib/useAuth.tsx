@@ -32,13 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function checkAuth() {
     try {
-      // Try to get current user (will auto-refresh if token expired)
       const response = await authApi.me();
-      if (response.success && response.data.user) {
-        setUser(response.data.user);
+      if (response.user) {
+        setUser(response.user);
       }
-    } catch (error) {
-      // Not authenticated or session expired
+    } catch {
       setUser(null);
       clearAccessToken();
     } finally {
@@ -48,15 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(email: string, password: string) {
     const response = await authApi.login(email, password);
-    if (response.success && response.data.user) {
-      setUser(response.data.user);
+    if (response.user) {
+      setUser(response.user);
     }
   }
 
   async function register(name: string, email: string, password: string) {
     const response = await authApi.register(name, email, password);
-    if (response.success && response.data.user) {
-      setUser(response.data.user);
+    if (response.user) {
+      setUser(response.user);
     }
   }
 
