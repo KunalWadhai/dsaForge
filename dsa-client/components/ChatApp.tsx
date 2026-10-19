@@ -5,10 +5,10 @@ import {
   ArrowDown, ArrowUpRight, BookOpen, BrainCircuit, Check, ChevronDown, CircleHelp,
   Copy, Database, FileText, GitBranch, Layers3, Lightbulb, LogOut, Menu,
   MessageSquare, MoreHorizontal, PanelLeftClose, Plus, Search, Send, Settings2, ShieldCheck,
-  Sparkles, ThumbsDown, ThumbsUp, X, Zap, Trash2, Moon, Sun, User, AlertCircle,
+  Sparkles, ThumbsDown, ThumbsUp, X, Zap, Trash2, Moon, User, AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { chatApi, authApi } from "@/lib/api";
+import { chatApi, authApi, bootstrapAuth, getAccessToken, AuthUser } from "@/lib/api";
 import { useAuthGate } from "@/lib/useAuthGate";
 import MarkdownMessage from "./MarkdownMessage";
 import AuthPromptModal from "./AuthPromptModal";
@@ -51,13 +51,20 @@ export default function ChatApp() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [threadMenuOpen, setThreadMenuOpen] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const { showGate, dismiss: dismissGate } = useAuthGate({ delayMs: 2 * 60 * 1000 });
-
   const activeTitle = useMemo(() => threads.find(t => t.id === activeThread)?.title || "New conversation", [threads, activeThread]);
+
+  // Restore session on mount and populate currentUser.
+  useEffect(() => {
+    bootstrapAuth().then((user) => {
+      if (user) setCurrentUser(user);
+    });
+  }, []);
 
   function notify(message: string) {
     setToast(message);
@@ -182,10 +189,8 @@ export default function ChatApp() {
 
   async function handleLogout() {
     setProfileDropdownOpen(false);
-    // Redirect immediately — authApi.logout clears the token synchronously
-    // before the server call, so navigation is instant and safe.
+    setCurrentUser(null);          // clear profile immediately
     router.push("/login");
-    // Fire server-side session invalidation in the background.
     authApi.logout().catch((err) => console.warn("Logout server call failed (ignored):", err));
   }
 
@@ -342,42 +347,59 @@ export default function ChatApp() {
               className="profile-row" 
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
             >
-              <div className="avatar">KW</div>
+              <div className="avatar">
+                {currentUser ? currentUser.name.slice(0, 2).toUpperCase() : "?"}
+              </div>
               <div className="profile-info">
-                <strong>Kunal Wadhai</strong>
-                <span>Personal workspace</span>
+                <strong>{currentUser ? currentUser.name : "Guest"}</strong>
+                <span>{currentUser ? currentUser.email : "Not signed in"}</span>
               </div>
               <ChevronDown size={16} className={`profile-chevron ${profileDropdownOpen ? "profile-chevron-open" : ""}`} />
             </button>
             
             {profileDropdownOpen && (
               <div className="profile-dropdown">
-                <button className="dropdown-item" onClick={() => {
-                  setProfileDropdownOpen(false);
-                  notify("Profile settings coming soon");
-                }}>
-                  <User size={15} />
-                  <span>Profile Settings</span>
-                </button>
-                <button className="dropdown-item" onClick={() => {
-                  setProfileDropdownOpen(false);
-                  notify("Theme customization coming soon");
-                }}>
-                  <Moon size={15} />
-                  <span>Appearance</span>
-                </button>
-                <button className="dropdown-item" onClick={() => {
-                  setProfileDropdownOpen(false);
-                  notify("Preferences coming soon");
-                }}>
-                  <Settings2 size={15} />
-                  <span>Preferences</span>
-                </button>
-                <div className="dropdown-divider" />
-                <button className="dropdown-item dropdown-item-danger" onClick={handleLogout}>
-                  <LogOut size={15} />
-                  <span>Log out</span>
-                </button>
+                {currentUser ? (
+                  <>
+                    <button className="dropdown-item" onClick={() => {
+                      setProfileDropdownOpen(false);
+                      notify("Profile settings coming soon");
+                    }}>
+                      <User size={15} />
+                      <span>Profile Settings</span>
+                    </button>
+                    <button className="dropdown-item" onClick={() => {
+                      setProfileDropdownOpen(false);
+                      notify("Theme customization coming soon");
+                    }}>
+                      <Moon size={15} />
+                      <span>Appearance</span>
+                    </button>
+                    <button className="dropdown-item" onClick={() => {
+                      setProfileDropdownOpen(false);
+                      notify("Preferences coming soon");
+                    }}>
+                      <Settings2 size={15} />
+                      <span>Preferences</span>
+                    </button>
+                    <div className="dropdown-divider" />
+                    <button className="dropdown-item dropdown-item-danger" onClick={handleLogout}>
+                      <LogOut size={15} />
+                      <span>Log out</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="dropdown-item" onClick={() => { setProfileDropdownOpen(false); router.push("/login"); }}>
+                      <LogOut size={15} style={{ transform: "scaleX(-1)" }} />
+                      <span>Sign in</span>
+                    </button>
+                    <button className="dropdown-item" onClick={() => { setProfileDropdownOpen(false); router.push("/register"); }}>
+                      <User size={15} />
+                      <span>Create account</span>
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -412,7 +434,7 @@ export default function ChatApp() {
             </button>
             <div className="avatar-wrapper">
               <button className="top-avatar" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}>
-                KW
+                {currentUser ? currentUser.name.slice(0, 2).toUpperCase() : "?"}
               </button>
             </div>
           </div>
