@@ -8,8 +8,10 @@ import {
   Sparkles, ThumbsDown, ThumbsUp, X, Zap, Trash2, Moon, Sun, User, AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { chatApi, authApi } from "@/lib/api";
+import { chatApi, authApi, setAccessToken } from "@/lib/api";
+import { useAuthGate } from "@/lib/useAuthGate";
 import MarkdownMessage from "./MarkdownMessage";
+import AuthPromptModal from "./AuthPromptModal";
 
 type Message = { id: string; role: "assistant" | "user"; content: string; time: string; sources?: string[] };
 type Thread = { id: string; title: string; active?: boolean };
@@ -53,7 +55,11 @@ export default function ChatApp() {
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const { showGate, dismiss: dismissGate, markAuthenticated } = useAuthGate({ delayMs: 2 * 60 * 1000 });
+
   const activeTitle = useMemo(() => threads.find(t => t.id === activeThread)?.title || "New conversation", [threads, activeThread]);
+
+  const { showGate, dismiss: dismissGate } = useAuthGate({ delayMs: 2 * 60 * 1000 });
 
   function notify(message: string) {
     setToast(message);
@@ -204,6 +210,9 @@ export default function ChatApp() {
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
       {mobileNav && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMobileNav(false)} />}
       
+      {/* Auth gate — shown to unauthenticated users after 2 min */}
+      {showGate && <AuthPromptModal onDismiss={dismissGate} />}
+
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
         <div className="modal-overlay" onClick={() => setDeleteConfirmId(null)}>
